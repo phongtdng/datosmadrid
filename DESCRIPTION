@@ -1,0 +1,11 @@
+Package: datosmadrid
+Title: Access and Download Open Data from datos.madrid.es
+Version: 0.0.0.9000
+Authors@R: 
+    person("Phong", "Duong" , "phongtdng@gmail.com", role = c("aut", "cre"))
+Description: Tools to programmatically search, download, and parse datasets 
+    from the Madrid open data portal (datos.madrid.es).
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
