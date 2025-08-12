@@ -4,14 +4,15 @@
 #'
 #' @param keyword character or character vector
 #' @param page_limit integer, how many result pages per keyword to scan
-#' @param n_max integer, max rows to return (after dedup)
-#' @param enrich logical, call get_metadata() to add details (slower)
-#' @return tibble with at least title, url, dataset_id
+#' @param n_max integer, max rows to return
+#' @param enrich logical, add details (slower)
+#' @return tibble with at least title, url, other metadata about dataset
 #'
 #' @export
 #'
 #' @examples
-#' search_datasets("bicicleta")
+#' search_datasets("bici")
+#' search_datasets("madrid", page_limit = 3, n_max = 30, enrich = TRUE)
 #'
 search_datasets <- function(keyword,
                             page_limit = 1,
@@ -24,22 +25,75 @@ search_datasets <- function(keyword,
   base_url <- "https://datos.madrid.es/sites/v/index.jsp?vgnextoid=374512b9ace9f310VgnVCM100000171f5a0aRCRD&buscar=true&Texto=&Sector=&Formato=&Periodicidad=&departamento=&orderByCombo=CONTENT_INSTANCE_NAME_DECODE"
   full_url <- gsub("Texto=", URLencode(paste0("Texto=",gsub(" ", "+",keyword))),base_url)
 
-  # ---- Extractfirst search page ----
+  # ---- Helper extract data function ----
   html <- rvest::read_html(full_url)
 
-  titles <- html |>
-    rvest::html_elements("a.event-link") |>
-    rvest::html_text(trim = TRUE)
+  extract <- function(html){
+    titles <- html |>
+      rvest::html_elements("a.event-link") |>
+      rvest::html_text(trim = TRUE)
 
-  links <- html |>
-    rvest::html_elements("a.event-link") |>
-    rvest::html_attr("href") |>
-    paste0("https://datos.madrid.es", rel_link = _)
+    # ---- Enrich data ----
 
-  result <- tibble::tibble(
-    title = titles
-  )
+    links <- html |>
+      rvest::html_elements("a.event-link") |>
+      rvest::html_attr("href") |>
+      paste0("https://datos.madrid.es", rel_link = _)
 
+    sectors <- html |>
+      rvest::html_elements("div.row") |>
+      rvest::html_elements("span.event-intro") |>
+      rvest::html_text() |>
+      (\(x) x[grepl("Sector", x)])() |>
+      gsub("Sector: ", "", x = _)
+
+    update_freq <- html |>
+      rvest::html_elements("div.row") |>
+      rvest::html_elements("span.event-intro") |>
+      rvest::html_text() |>
+      (\(x) x[grepl("Actualización", x)])() |>
+      gsub("Actualización: ", "", x = _)
+
+    last_updates <- html |>
+      rvest::html_elements("div.row") |>
+      rvest::html_elements("span.event-intro") |>
+      rvest::html_text() |>
+      (\(x) x[grepl("Última actualización", x)])() |>
+      gsub("Última actualización: ", "", x = _)
+
+    files <- c()
+
+    cards <- html |> rvest::html_elements("li.withtable")
+    resources_nodes <- cards |> rvest::html_element("div.event-info.min ul")
+    if (is.null(resources_nodes)) return(character(0))
+
+    for (i in resources_nodes) {
+      x <- i |>
+        rvest::html_elements("span") |>
+        rvest::html_text() |>
+        paste(x = _, collapse = ",")
+      files <- c(files, x)
+    }
+
+    if(enrich == FALSE) {
+      result <- tibble::tibble(
+        title = titles
+      )
+    } else {
+      result <- tibble::tibble(
+        title = titles,
+        sector = sectors,
+        update_frequency = update_freq,
+        last_update = last_updates,
+        files_available = files,
+        link = links
+      )
+    }
+
+    return(result)
+  }
+
+  result <- extract(html)
   # ---- Extract other pages ----
   all_pages <- html |>
     rvest::html_elements("ul.pagination") |>
@@ -60,18 +114,8 @@ search_datasets <- function(keyword,
   if (page_limit > 1) {
     for (i in 1:(page_limit-1)) {
       html <- rvest::read_html(paste0("https://datos.madrid.es", all_pages[i]))
-      titles <- html |>
-        rvest::html_elements("a.event-link") |>
-        rvest::html_text(trim = TRUE)
 
-      links <- html |>
-        rvest::html_elements("a.event-link") |>
-        rvest::html_attr("href") |>
-        paste0("https://datos.madrid.es", rel_link = _)
-
-      new_page <- tibble::tibble(
-        title = titles
-      )
+      new_page <- extract(html)
       result <- tibble::add_row(result, new_page)
     }
   }
@@ -81,3 +125,4 @@ search_datasets <- function(keyword,
                ". Results shown: ", ifelse(n_max > nrow(result), nrow(result), n_max)))
   return(print(result, n = n_max))
 }
+
