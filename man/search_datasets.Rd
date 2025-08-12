@@ -4,18 +4,25 @@
 \alias{search_datasets}
 \title{Search datasets from datos.madrid.es}
 \usage{
-search_datasets(keyword)
+search_datasets(keyword, page_limit = 1, n_max = Inf, enrich = FALSE)
 }
 \arguments{
-\item{keyword}{A character string to search for (e.g. "bicicleta", "eventos")}
+\item{keyword}{character or character vector}
+
+\item{page_limit}{integer, how many result pages per keyword to scan}
+
+\item{n_max}{integer, max rows to return}
+
+\item{enrich}{logical, add details (slower)}
 }
 \value{
-A tibble data frame with dataset titles
+tibble with at least title, url, other metadata about dataset
 }
 \description{
 Searches the Madrid open data portal for datasets matching a keyword.
 }
 \examples{
-search_datasets("bicicleta")
+search_datasets("bici")
+search_datasets("madrid", page_limit = 3, n_max = 30, enrich = TRUE)
 
 }
