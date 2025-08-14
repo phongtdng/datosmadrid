@@ -6,8 +6,9 @@
 \usage{
 download_dataset(
   url,
+  format = NULL,
   save_to = NULL,
-  return = c("parsed", "path", "both"),
+  parse = FALSE,
   quiet = TRUE
 )
 }
@@ -16,19 +17,17 @@ download_dataset(
 (e.g., "https://datos.madrid.es/egob/catalogo/300228-0-agenda-actividades-culturales")
 or a direct file URL (ends with .csv, .json, .xml, .xls, .xlsx, .txt).}
 
-\item{save_to}{Optional path (directory or file). If a directory, the filename
-is inferred from the URL. If \code{NULL} (default), a temporary file is used.}
-
-\item{return}{What to return: \code{"parsed"} (default), \code{"path"} (file path only),
-or \code{"both"} (list with \code{data} and \code{path}).}
-
-\item{quiet}{Logical, suppress messages. Default TRUE.}
-
 \item{format}{Optional character scalar to force a specific format
 (e.g., "csv", "json", "xml", "xls", "xlsx", "txt"). Case-insensitive.}
 
-\item{prefer}{Character vector defining the format preference order when
-\code{format} is not supplied. Defaults to c("csv", "json", "xml", "xlsx", "xls", "txt").}
+\item{save_to}{Optional path (directory or file). If a directory, the filename
+is inferred from the URL. If \code{NULL} (default), a temporary file is used.
+#' @param parse Logical, default is \code{FALSE}.
+If \code{TRUE}, the downloaded file(s) will be read into R and returned as parsed objects
+(e.g., a data frame for CSV, a list for JSON, an XML document for XML).
+If \code{FALSE}, only the file path(s) to the downloaded file(s) are returned.}
+
+\item{quiet}{Logical, suppress messages. Default TRUE.}
 }
 \value{
 By default, a parsed R object:
@@ -49,7 +48,11 @@ a parsed R object. If a detail page URL is provided, the function uses
 }
 \examples{
 out <- download_dataset(
-  "https://datos.madrid.es/egob/catalogo/300228-0-agenda-actividades-culturales"
+  "https://datos.madrid.es/portal/site/egob/menuitem.c05c1f754a33a9fbe4b2e4b284f1a5a0/?vgnextoid=49e83d5e3af7a510VgnVCM1000001d4a900aRCRD&vgnextchannel=374512b9ace9f310VgnVCM100000171f5a0aRCRD&vgnextfmt=default"
+)
+
+out <- download_dataset(
+"https://datos.madrid.es/egob/catalogo/300094-12-areas-caninas.xlsx"
 )
 
 }
