@@ -2,5 +2,6 @@
 
 export(download_dataset)
 export(get_metadata)
+export(open_in_browser)
 export(portal_overview)
 export(search_datasets)
