@@ -1,3 +1,5 @@
+
+
 list_api_endpoints <- function(filter = NULL,
                                method = NULL,
                                include_params = TRUE) {
@@ -18,14 +20,100 @@ list_api_endpoints <- function(filter = NULL,
     stop("Spec has no paths. The API description may have changed.", call. = FALSE)
   }
 
-  # ---- titles ----
-  titles <- c()
-  for (i in 1:length(paths)) {
-    title <- paths[[i]]$get$tags[[1]]
-    titles <- c(titles, title)
+  # extract parameters helper
+  extract_params <- function(path_obj, op_obj) {
+    plist <- c(path_obj$parameters, op_obj$parameters)
+
+    if (is.null(plist) || !length(plist)) {
+      return(data.frame(name    =character(0),
+                        'in'     =character(0),
+                        required =logical(0),
+                        type     =character(0),
+                        stringsAsFactors = FALSE))
+    }
+    # build a tiny df helper
+    out <- lapply(plist, function(p) {
+      type <- if (!is.null(p$type)) p$type else if (!is.null(p$schema$type)) p$schema$type else NA_character_
+      data.frame(
+        name     = as.character(p$name %||% NA_character_),
+        'in'     = as.character(p$`in` %||% NA_character_),
+        required = as.logical(p$required %||% FALSE),
+        type     = as.character(type),
+        stringsAsFactors = FALSE
+      )
+    })
+    do.call(rbind, out)
   }
 
+  # ---- build rows (one per path+method) ----
+  rows <- list()
+  r_i <- 0L #index counter
+  path_names <- names(paths)
+  for (i in seq_along(paths)) {
+    p_name <- path_names[i]
+    p_obj  <- paths[[i]]
+    methods <- names(p_obj)
 
+    # keep only standard http method keys
+    keep_m <- tolower(methods) %in% c("get","post","put","delete","patch","options","head")
+    if (!any(keep_m)) next
 
+    for (mi in which(keep_m)) {
+      method_name <- tolower(methods[mi])
+      op_obj <- p_obj[[mi]]
+
+    # basic fields for filter
+    tags    <- op_obj$tags |>  as.character()
+    summary <- if (!is.null(op_obj$summary)) op_obj$summary else ""
+    path_lc <- tolower(p_name)
+
+    # apply filters
+    if (!is.null(method)) {
+      if (!tolower(method_name) %in% tolower(method)) next
+    }
+    if (!is.null(filter)) {
+      f <- tolower(filter)
+      has_match <- any(stringr::str_detect(tolower(tags), f)) ||
+        stringr::str_detect(path_lc, f) ||
+        stringr::str_detect(tolower(summary), f)
+      if (!has_match) next
+    }
+    r_i <- r_i + 1L
+    rows[[r_i]] <- list(
+      title = tags,
+      path   = p_name,
+      method = method_name,
+      parameters = if (isTRUE(include_params)) extract_params(p_obj, op_obj) else NULL
+    )
+
+    }
   }
 
+  if (!length(rows)) {
+    # return empty tibble with stable columns if failure
+    out <- tibble::tibble(
+      path = character(0),
+      method = character(0)
+    )
+    if (isTRUE(include_params)) out$parameters <- list()
+    return(out)
+  }
+
+  # ---- produce tibble ----
+  path_vec   <- vapply(rows, `[[`, character(1), "path")
+  method_vec <- vapply(rows, `[[`, character(1), "method")
+  title_vec <- vapply(rows, `[[`, character(1), "title")
+
+  out <- tibble::tibble(
+    title = title_vec,
+    path = path_vec,
+    method = method_vec
+  )
+  if (isTRUE(include_params)) {
+    params_list <- lapply(rows, `[[`, "parameters")
+    out$parameters <- params_list
+  }
+
+  out
+
+}
