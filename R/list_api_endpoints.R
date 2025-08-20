@@ -1,5 +1,37 @@
-
-
+#' List API endpoints from Madrid's OpenAPI spec
+#'
+#' @description
+#' Reads the Madrid Open Data API OpenAPI/Swagger JSON and returns a tidy table
+#' of endpoints (one row per path+method). You can filter by keyword/tag and HTTP
+#' method and choose to include parameter details.
+#'
+#' @param filter Character or \code{NULL}. If provided, keep only endpoints whose
+#'   \emph{tags}, \emph{path}, or \emph{summary} contain this substring (case-insensitive).
+#' @param method Character or \code{NULL}. One or more HTTP methods to keep
+#'   (e.g., \code{"get"}, \code{"post"}). Case-insensitive.
+#' @param include_params Logical, default \code{TRUE}. If \code{TRUE}, includes a
+#'   list-column \code{parameters} with basic details (name, in, required, type/schema).
+#'
+#' @return A tibble with columns:
+#' \itemize{
+#'   \item \code{path} (chr)
+#'   \item \code{method} (chr)
+#'   \item \code{parameters} (list of data.frames; present only if \code{include_params = TRUE})
+#' }
+#'
+#' @examples
+#' \dontrun{
+#' # All GET endpoints with parameter details
+#' list_api_endpoints(method = "get")
+#'
+#' # Endpoints related to "agenda" (matches tag/path/summary)
+#' list_api_endpoints(filter = "agenda")
+#'
+#' # POST endpoints, without parameters
+#' list_api_endpoints(method = "post", include_params = FALSE)
+#' }
+#'
+#' @export
 list_api_endpoints <- function(filter = NULL,
                                method = NULL,
                                include_params = TRUE) {
