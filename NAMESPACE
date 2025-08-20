@@ -2,6 +2,7 @@
 
 export(download_dataset)
 export(get_metadata)
+export(list_api_endpoints)
 export(open_in_browser)
 export(portal_overview)
 export(search_datasets)
