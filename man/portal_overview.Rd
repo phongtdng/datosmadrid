@@ -4,7 +4,12 @@
 \alias{portal_overview}
 \title{Overview of the Madrid Open Data Portal}
 \usage{
-portal_overview()
+portal_overview(keyword = NULL, catalogue = c("datasets", "api", "all"))
+}
+\arguments{
+\item{keyword}{Character (optional). Filter results by keyword (case-insensitive). Default \code{NULL} returns all.}
+
+\item{catalogue}{One of \code{"datasets"}, \code{"api"}, or \code{"all"} (default). Select which portal section(s) to summarize.}
 }
 \value{
 Prints general conditions and total datasets as messages,
@@ -17,12 +22,9 @@ and returns (invisibly) a tibble with:
 \description{
 Scrapes general information about the Madrid Open Data portal, including
 usage conditions, total number of datasets, available categories,
-and the number of datasets per category.
+the number of datasets per category, and available api endpoints
 }
 \details{
-This function currently focuses on the catalogue section of the portal.
-Future extensions may include API-specific information.
-
 The function retrieves:
 \itemize{
 \item General condition of use for portal data
