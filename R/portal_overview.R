@@ -2,10 +2,10 @@
 #'
 #' Scrapes general information about the Madrid Open Data portal, including
 #' usage conditions, total number of datasets, available categories,
-#' and the number of datasets per category.
+#' the number of datasets per category, and available api endpoints
 #'
-#' This function currently focuses on the catalogue section of the portal.
-#' Future extensions may include API-specific information.
+#' @param keyword Character (optional). Filter results by keyword (case-insensitive). Default \code{NULL} returns all.
+#' @param catalogue One of \code{"datasets"}, \code{"api"}, or \code{"all"} (default). Select which portal section(s) to summarize.
 #'
 #' @details
 #' The function retrieves:
@@ -31,7 +31,8 @@
 #'
 #' @export
 portal_overview <- function(
-    # catalogue = c("datasets", "api", "all")
+    keyword = NULL,
+    catalogue = c("datasets", "api", "all")
     ) {
   # ---- deps ----
   if (!requireNamespace("rvest", quietly = TRUE))   stop("Please install 'rvest'.")
@@ -49,33 +50,16 @@ portal_overview <- function(
   print(paste("General Condition:",use_condition))
 
   # ---- datasets ----
-  url <- "https://datos.madrid.es/portal/site/egob/menuitem.9e1e2f6404558187cf35cf3584f1a5a0/?vgnextoid=374512b9ace9f310VgnVCM100000171f5a0aRCRD&vgnextchannel=374512b9ace9f310VgnVCM100000171f5a0aRCRD&vgnextfmt=default"
-  html <- rvest::read_html(url)
+  if (catalogue != "api") {
+    if(is.null(keyword)) {
+      url <- "https://datos.madrid.es/sites/v/index.jsp?vgnextoid=374512b9ace9f310VgnVCM100000171f5a0aRCRD&buscar=true&Texto=&Sector=&Formato=&Periodicidad=&departamento=&orderByCombo=CONTENT_INSTANCE_NAME_DECODE"
+    } else {
+      base_url <- "https://datos.madrid.es/sites/v/index.jsp?vgnextoid=374512b9ace9f310VgnVCM100000171f5a0aRCRD&buscar=true&Texto=&Sector=&Formato=&Periodicidad=&departamento=&orderByCombo=CONTENT_INSTANCE_NAME_DECODE"
+      url <- gsub("Texto=", URLencode(paste0("Texto=",gsub(" ", "+", keyword))),base_url)
+    }
 
-  total_datasets <- html |>
-    rvest::html_elements("ul#totalResultsUL") |>
-    rvest::html_element("li") |>
-    rvest::html_text() |>
-    gsub(".*?([0-9]+).*", "\\1", x = _)
 
-  print(paste("Total datasets:", total_datasets))
-
-  categories <- html |>
-    rvest::html_elements("select#Sector") |>
-    rvest::html_elements("option") |>
-    rvest::html_text() |>
-    (\(x) x[!grepl("Seleccione", x)])()
-
-  # ---- datasets per category ----
-  url <- "https://datos.madrid.es/sites/v/index.jsp?vgnextoid=374512b9ace9f310VgnVCM100000171f5a0aRCRD&buscar=true&Texto=&Sector=&Formato=&Periodicidad=&departamento=&orderByCombo=CONTENT_INSTANCE_NAME_DECODE"
-  cat_datasets <- c()
-  for (i in categories) {
-    cat <- i |>
-      tolower() |>
-      iconv(x = _, from = "UTF-8", to = "ASCII//TRANSLIT")
-    full_url <- gsub("Sector=", URLencode(paste0("Sector=",gsub(" y | | e ", "-",cat))),url)
-
-    html <- rvest::read_html(full_url)
+    html <- rvest::read_html(url)
 
     total_datasets <- html |>
       rvest::html_elements("ul#totalResultsUL") |>
@@ -83,13 +67,57 @@ portal_overview <- function(
       rvest::html_text() |>
       gsub(".*?([0-9]+).*", "\\1", x = _)
 
-    cat_datasets <- c(cat_datasets, total_datasets)
+    print(paste("Total datasets:", total_datasets))
+
+    categories <- html |>
+      rvest::html_elements("select#Sector") |>
+      rvest::html_elements("option") |>
+      rvest::html_text() |>
+      (\(x) x[!grepl("Seleccione", x)])()
+
+    # ---- datasets per category ----
+    cat_datasets <- c()
+    for (i in categories) {
+      cat <- i |>
+        tolower() |>
+        iconv(x = _, from = "UTF-8", to = "ASCII//TRANSLIT")
+      full_url <- gsub("Sector=", URLencode(paste0("Sector=",gsub(" y | | e ", "-",cat))),url)
+
+      html <- rvest::read_html(full_url)
+
+      total_datasets <- html |>
+        rvest::html_elements("ul#totalResultsUL") |>
+        rvest::html_element("li") |>
+        rvest::html_text() |>
+        gsub(".*?([0-9]+).*", "\\1", x = _)
+
+      cat_datasets <- c(cat_datasets, total_datasets)
+    }
+
+    catalogue_tbl <- tibble::tibble(
+      category = as.character(categories),
+      total_datasets = as.integer(cat_datasets)
+    )
+
+    if(!is.null(keyword)) {
+      catalogue_tbl <- catalogue_tbl |> dplyr::filter(total_datasets > 0)
+    }
   }
 
-  catalogue_tbl <- tibble::tibble(
-    category = as.character(categories),
-    total_datasets = as.integer(cat_datasets)
-  )
+  if(is.null(keyword)) {
+    api <- datosmadrid::list_api_endpoints(include_params = FALSE)
+  } else {
+    api <- datosmadrid::list_api_endpoints(filter = keyword, include_params = FALSE)
+  }
 
-  print(catalogue_tbl, n = Inf)
+  if(catalogue == "datasets") {
+    catalogue_tbl
+  } else if (catalogue == "api") {
+    api
+  } else {
+    out <- list(datasets = catalogue_tbl, api = api)
+    out
+  }
 }
+
+portal_overview(catalogue = "all")
