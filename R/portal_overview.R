@@ -119,5 +119,3 @@ portal_overview <- function(
     out
   }
 }
-
-portal_overview(catalogue = "all")
