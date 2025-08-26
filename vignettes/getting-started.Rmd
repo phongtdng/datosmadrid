@@ -1,0 +1,39 @@
+---
+title: "getting-started"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{getting-started}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Overview
+
+datosmadrid helps you search the Madrid Open Data catalogue and call its public API from R.
+
+```{r}
+library(datosmadrid)
+```
+
+# Search the catalogue
+
+Find datasets by keyword.
+```{r}
+res <- search_datasets("bici", page_limit = 1, n_max = 20)
+res
+```
+
+Pick a dataset to explore:
+```{r}
+ds <- res$title[1]
+link <- res$url[1]  # if you return urls; otherwise construct manually
+link
+```
+
