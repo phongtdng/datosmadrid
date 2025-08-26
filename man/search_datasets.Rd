@@ -4,10 +4,21 @@
 \alias{search_datasets}
 \title{Search datasets from datos.madrid.es}
 \usage{
-search_datasets(keyword, page_limit = 1, n_max = Inf, enrich = FALSE)
+search_datasets(
+  keyword,
+  sector = NULL,
+  format = NULL,
+  page_limit = 1,
+  n_max = Inf,
+  enrich = FALSE
+)
 }
 \arguments{
 \item{keyword}{character or character vector}
+
+\item{sector}{character or character vector, filter by sector}
+
+\item{format}{character or character vector, filter by format available}
 
 \item{page_limit}{integer, how many result pages per keyword to scan}
 
