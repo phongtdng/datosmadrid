@@ -25,15 +25,57 @@ library(datosmadrid)
 # Search the catalogue
 
 Find datasets by keyword.
+
 ```{r}
-res <- search_datasets("bici", page_limit = 1, n_max = 20)
+res <- search_datasets("bici", page_limit = 1, n_max = 20, enrich = TRUE)
 res
 ```
 
 Pick a dataset to explore:
+
 ```{r}
 ds <- res$title[1]
-link <- res$url[1]  # if you return urls; otherwise construct manually
+link <- res$link[1]  # if you return urls; otherwise construct manually
 link
 ```
 
+# Inspect metadata
+
+```{r}
+md <- get_metadata(link)
+names(md)
+md$title
+head(md$resources)  # urls, formats, descriptions
+```
+
+# Download a resource
+
+```{r}
+md <- get_metadata(link)
+names(md)
+md$title
+head(md$resources)  # urls, formats, descriptions
+```
+
+Parse directly:
+
+```{r}
+dat <- download_dataset(link, save_to = tempdir(), parse = TRUE)
+dat[[1]]
+```
+
+# Portal overview
+
+```{r}
+ov <- portal_overview(catalogue = "both")
+ov$datasets
+ov$api
+```
+
+# Good practice
+
+-   Respect portal terms and robots.txt.
+
+-   Keep requests polite (sleep between pages).
+
+-   Cache intermediate results during development
