@@ -3,6 +3,8 @@
 #' @description Searches the Madrid open data portal for datasets matching a keyword.
 #'
 #' @param keyword character or character vector
+#' @param sector character or character vector, filter by sector
+#' @param format character or character vector, filter by format available
 #' @param page_limit integer, how many result pages per keyword to scan
 #' @param n_max integer, max rows to return
 #' @param enrich logical, add details (slower)
@@ -15,6 +17,8 @@
 #' search_datasets("madrid", page_limit = 3, n_max = 30, enrich = TRUE)
 #'
 search_datasets <- function(keyword,
+                            sector = NULL,
+                            format = NULL,
                             page_limit = 1,
                             n_max = Inf,
                             enrich = FALSE) {
@@ -24,7 +28,19 @@ search_datasets <- function(keyword,
   # ---- Build search URL ----
   base_url <- "https://datos.madrid.es/sites/v/index.jsp?vgnextoid=374512b9ace9f310VgnVCM100000171f5a0aRCRD&buscar=true&Texto=&Sector=&Formato=&Periodicidad=&departamento=&orderByCombo=CONTENT_INSTANCE_NAME_DECODE"
   full_url <- gsub("Texto=", URLencode(paste0("Texto=",gsub(" ", "+",keyword))),base_url)
+  if (!is.null(sector)) {
+    sector <- sector |>
+      tolower() |>
+      iconv(x = _, from = "UTF-8", to = "ASCII//TRANSLIT")
+    full_url <- gsub("Sector=", URLencode(paste0("Sector=",gsub(" y | | e ", "-", sector))),base_url)
+  }
 
+  if (!is.null(format)) {
+    format <- format |>
+      tolower() |>
+      iconv(x = _, from = "UTF-8", to = "ASCII//TRANSLIT")
+    full_url <- gsub("Formato=", URLencode(paste0("Formato=",gsub(" y | | e ", "-", format))),base_url)
+  }
   # ---- Helper extract data function ----
   html <- rvest::read_html(full_url)
 
@@ -125,4 +141,3 @@ search_datasets <- function(keyword,
                ". Results shown: ", ifelse(n_max > nrow(result), nrow(result), n_max)))
   return(print(result, n = n_max))
 }
-
