@@ -2,13 +2,23 @@ Package: datosmadrid
 Title: Access and Download Open Data from datos.madrid.es
 Version: 0.0.0.9000
 Authors@R: 
-    person("Phong", "Duong" , "phongtdng@gmail.com", role = c("aut", "cre"))
+    person(given = "Phong",family = "Duong" ,email = "phongtdng@gmail.com", role = c("aut", "cre"))
 Description: Tools to programmatically search, download, and parse datasets 
     from the Madrid open data portal (datos.madrid.es).
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
+Depends: R (>= 4.1.0)
+Imports: 
+    httr,
+    jsonlite,
+    rvest,
+    tibble,
+    stringr
 Suggests: 
+    knitr,
+    rmarkdown,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
+VignetteBuilder: knitr
