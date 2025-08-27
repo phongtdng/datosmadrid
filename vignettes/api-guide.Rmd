@@ -1,0 +1,80 @@
+---
+title: "Working with the Madrid Open Data API"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{api-guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE   
+)
+```
+
+# Overview
+
+This vignette shows how to:
+
+-   Discover API endpoints from the OpenAPI spec
+-   Inspect parameters (path vs query)
+-   Call endpoints with fetch_api()
+-   Turn JSON responses into tables
+
+We’ll use the helper functions included in `datosmadrid`:
+
+-   `list_api_endpoints()` - list and filter endpoints
+-   `fetch_api()` - call one endpoint with path_params and query
+
+```{r}
+library(datosmadrid)
+```
+
+# Discover endpoints
+
+List endpoints and filter by keyword (matches tags, path, summary) and method:
+
+```{r}
+# All GET endpoints that mention "bici"
+eps <- list_api_endpoints(filter = "deporte", method = "get", include_params = TRUE)
+head(eps[, c("path", "method", "title")])
+```
+
+# Path vs query parameters
+
+-   **Path params** are placeholders inside the path (e.g., `/{id}` or `.{responseContentType}`), passed via `path_params = list(id = 123, responseContentType = "json")`.
+
+```{=html}
+<!-- -->
+```
+-    **Query params** appear after `?` (e.g., `?q=museo&limite=50`), passed via `query = list(q = "museo", limite = 50)`.
+
+Example templated path: `/catalogo/205099-12104809-aparca-bicis.{responseContentType}`
+
+The `responseContentType` placeholder must be filled with `"json"` (or another allowed value)
+
+# Call API with `fetch_api()`
+
+```{r}
+out <- fetch_api(
+  path = "/catalogo/210227-0-piscinas-publicas.{formato}",
+  path_params = list(formato = "json"),
+  parse = TRUE
+)
+str(out)
+```
+
+`parse = TRUE` tells `fetch_api()` to parse JSON and try to return a **tibble** when feasible; otherwise you get a parsed list (for nested structures).
+
+# Find endpoints by category / tag
+
+Filter endpoints by a tag/keyword:
+
+```{r}
+cultura <- list_api_endpoints(filter = "cultura", method = "get", include_params = TRUE)
+cultura
+unique(unlist(cultura$parameters))  # quick glance at parameter names
+```
