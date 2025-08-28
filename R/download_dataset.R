@@ -103,7 +103,7 @@ download_dataset <- function(url,
     if(parse){
       parsed <- parse_by_extension(path, ext)
       return(parsed)
-    }
+    } else {return(path)}
   } else {
     # ---- Resources table ----
     meta_data <- datosmadrid::get_metadata(url)
@@ -146,6 +146,6 @@ download_dataset <- function(url,
       # ---- Parsed ----
       if(parse) {parsed[[i]] <- parse_by_extension(path, format)}
     }
-    if(parse) return(parsed)
+    if(parse) {return(parsed)} else {return(save_to)}
   }
 }
