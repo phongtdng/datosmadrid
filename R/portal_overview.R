@@ -26,7 +26,11 @@
 #'
 #' @examples
 #' \dontrun{
-#' portal_overview()
+#' # Overview of all datasets and api available on the portal
+#' portal_overview(catalogue = "all")
+#'
+#' # Overview of only datasets and with filtered keywords
+#' portal_overview(keyword = "deporte", catalogue = "datasets")
 #' }
 #'
 #' @export

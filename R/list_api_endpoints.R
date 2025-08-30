@@ -22,13 +22,10 @@
 #' @examples
 #' \dontrun{
 #' # All GET endpoints with parameter details
-#' list_api_endpoints(method = "get")
+# list_api_endpoints(method = "get")
 #'
-#' # Endpoints related to "agenda" (matches tag/path/summary)
+#' # Endpoints related to "agenda" (matches tag, path)
 #' list_api_endpoints(filter = "agenda")
-#'
-#' # POST endpoints, without parameters
-#' list_api_endpoints(method = "post", include_params = FALSE)
 #' }
 #'
 #' @export
