@@ -30,13 +30,17 @@
 #' If \code{return = "both"}, returns a list with elements \code{data} and \code{path}.
 #'
 #' @examples
-#' out <- download_dataset(
-#'   "https://datos.madrid.es/portal/site/egob/menuitem.c05c1f754a33a9fbe4b2e4b284f1a5a0/?vgnextoid=49e83d5e3af7a510VgnVCM1000001d4a900aRCRD&vgnextchannel=374512b9ace9f310VgnVCM100000171f5a0aRCRD&vgnextfmt=default"
-#' )
+#' \dontrun{
+#' # Example: Download a small CSV dataset
+#' url <- "https://datos.madrid.es/egob/catalogo/300594-1-registro-AIP.csv"
 #'
-#' out <- download_dataset(
-#' "https://datos.madrid.es/egob/catalogo/300094-12-areas-caninas.xlsx"
-#' )
+#' # Save and parse into a tibble
+#' data <- download_dataset(url, save_to = tempdir(), parse = TRUE)
+#'
+#' # Save only (no parsing), returns file path
+#' path <- download_dataset(url, save_to = tempdir(), parse = FALSE)
+#' path
+#' }
 #'
 #' @export
 
