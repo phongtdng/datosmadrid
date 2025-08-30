@@ -10,12 +10,20 @@
 #' @param enrich logical, add details (slower)
 #' @return tibble with at least title, url, other metadata about dataset
 #'
-#' @export
-#'
 #' @examples
+#' \dontrun{
+#' # Search for available datasets with "bici" in the title
 #' search_datasets("bici")
+#'
+#' # Search by sector/category filter
+#' search_datasets("", sector = "Deporte")
+#'
+#' # Controlled search with page and row returned output and additional info about the dataset
 #' search_datasets("madrid", page_limit = 3, n_max = 30, enrich = TRUE)
 #'
+#' }
+#'
+#' @export
 search_datasets <- function(keyword,
                             sector = NULL,
                             format = NULL,
