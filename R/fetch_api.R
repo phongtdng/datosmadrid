@@ -39,24 +39,12 @@
 #'
 #' @examples
 #' \dontrun{
-#' # Path templating: fill {id}
 #' fetch_api(
-#'   path = "/catalogo/tipo/evento/{id}.json",
-#'   path_params = list(id = 203)
+#'   path = "/catalogo/201132-0-museos.{formato}",
+#'   path_params = list(formato = "json"),
+#'   parse = TRUE
 #' )
 #'
-#' # With query parameters (e.g., search agenda)
-#' fetch_api(
-#'   path = "/catalogo/agenda.json",
-#'   query = list(q = "museo", limite = 50)
-#' )
-#'
-#' # Get raw JSON text
-#' fetch_api(
-#'   path = "/catalogo/agenda.json",
-#'   query = list(q = "teatro"),
-#'   parse = FALSE
-#' )
 #' }
 #'
 #' @seealso \code{\link[httr]{GET}}, \code{\link[jsonlite]{fromJSON}}
