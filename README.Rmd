@@ -1,4 +1,18 @@
+---
+output: github_document
+---
+
 <!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%",
+  eval = FALSE
+)
+```
 
 # datosmadrid
 
@@ -28,7 +42,7 @@ This package is developed as part of a Master’s thesis project.
 
 You can install the development version from GitHub:
 
-``` r
+```{r install}
 # install.packages("remotes")
 
 remotes::install_github("phongtdng/datosmadrid")
@@ -38,7 +52,7 @@ remotes::install_github("phongtdng/datosmadrid")
 
 ## Explore the portal overview
 
-``` r
+```{r}
 library(datosmadrid)
 
 ov <- portal_overview(catalogue = "all")
@@ -48,7 +62,7 @@ ov$api
 
 ## Search for datasets
 
-``` r
+```{r}
 # Search catalogue
 res <- search_datasets("bici", page_limit = 1, n_max = 10, enrich = TRUE)
 res
@@ -56,7 +70,7 @@ res
 
 ## Get metadata and Download resources
 
-``` r
+```{r}
 md <- get_metadata(res$link[1])
 md$title
 md$resources
@@ -69,7 +83,7 @@ head(data)
 
 ## API Endpoints
 
-``` r
+```{r}
 eps <- list_api_endpoints(filter = "bici", method = "get", include_params = TRUE)
 head(eps[, c("path","method","title")])
 
@@ -84,7 +98,7 @@ out <- fetch_api(
 
 See package vignettes for more examples
 
-``` r
+```{r}
 browseVignettes("datosmadrid")
 ```
 
@@ -94,4 +108,4 @@ browseVignettes("datosmadrid")
 
 -   Results may change as the portal content is updated.
 
--   Please respect the portal’s terms of use.
+-   Please respect the portal's terms of use.
